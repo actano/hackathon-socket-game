@@ -4,9 +4,22 @@
   "description": "my first socket.io app",
   "dependencies": {
     "express": "^4.15.2",
-    "socket.io": "^1.7.3"
+    "jquery": "^3.2.1",
+    "socket.io": "^1.7.3",
+    "socket.io-client": "^1.7.3"
+  },
+  "devDependencies": {
+    "babel": "~6.5.2",
+    "babel-cli": "^6.10.1",
+    "babel-loader": "~6.2.4",
+    "babel-preset-es2015": "~6.9.0",
+    "babel-preset-react": "~6.5.0",
+    "rimraf": "^2.6.1",
+    "webpack": "^1.13.1"
   },
   "scripts": {
-    "start": "node index.js"
+    "clean": "rimraf dist",
+    "build": "npm run clean && webpack",
+    "start": "npm run build && babel-node src/server/server.js"
   }
 }
