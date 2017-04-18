@@ -18,9 +18,18 @@ const keyCodes = {
 
 var canvas = document.getElementById('board');
 
-$(document).keypress((event) => {
+let playerColors = new Array(100).fill(null)
+for (let x = 0; x < 100; x++) {
+  playerColors[x] = new Array(3).fill(0)
+  playerColors[x][0] = getRandomInt(0, 255)
+  playerColors[x][1] = getRandomInt(0, 255)
+  playerColors[x][2] = getRandomInt(0, 255)
+}
+
+$(document).keydown((event) => {
   const key = keyCodes[event.keyCode]
   if (key) {
+    console.log(key)
     socket.emit('player movement', { playerId: myId, direction: key })
   }
 })
@@ -63,25 +72,16 @@ socket.on('next frame', function(frame) {
   console.log(frameIdx, myself.position, 'dead?', youAreDead)
 
   // console.log("World", world)
-  let height = world.length;
-  let width = world[0].length;
+  let width = world.length;
+  let height = world[0].length;
   let playersCount = players.length
 
   var buffer = new Uint8ClampedArray(width * height * 4).fill(255);
 
-  let playerColors = new Array(playersCount).fill(null)
-  playerColors.forEach((_, x) => {
-    playerColors[x] = new Array(3).fill(0)
-    playerColors[x][0] = getRandomInt(0, 255)
-    playerColors[x][1] = getRandomInt(0, 255)
-    playerColors[x][2] = getRandomInt(0, 255)
-    console.log(playerColors[x]);
-  })
-
   for(var y = 0; y < height; y++) {
     for(var x = 0; x < width; x++) {
         var pos = (y * width + x) * 4; // position in buffer based on x and y
-        let playerId = world[y][x];
+        let playerId = world[x][y];
         // playerId = 1
         if (playerId != null) {
           let playerIdx = -1;
@@ -90,26 +90,26 @@ socket.on('next frame', function(frame) {
               playerIdx = player;
             }
           }
-          console.log("playerIdx", playerIdx, "  ", playerId, "  ", players);
+          // console.log("playerIdx", playerIdx, "  ", playerId, "  ", players);
           // playerIdx = 1
           buffer[pos  ] = playerColors[playerIdx][0];           // some R value [0, 255]
           buffer[pos+1] = playerColors[playerIdx][1];           // some G value
           buffer[pos+2] = playerColors[playerIdx][2];           // some B value
-          buffer[pos+3] = 200;           // set alpha channel
+          buffer[pos+3] = 128;           // set alpha channel
         }
     }
 }
 
   for(var playerHeads = 0; playerHeads < players.length; playerHeads++) {
-    let [y, x] = players[playerHeads].position;
+    let [x, y] = players[playerHeads].position;
     var pos = (y * width + x) * 4; // position in buffer based on x and y
     buffer[pos+3] = 255;           // set alpha channel
   }
 
   var ctx = canvas.getContext('2d');
 
-  canvas.width = width;
-  canvas.height = height;
+  // canvas.width = width;
+  // canvas.height = height;
 
   // create imageData object
   var idata = ctx.createImageData(width, height);
