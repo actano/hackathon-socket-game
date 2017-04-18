@@ -19,7 +19,7 @@ const DOWN = 'DOWN'
 const LEFT = 'LEFT'
 const RIGHT = 'RIGHT'
 const worldSize = [200, 100]
-const frameRate = 200
+const frameRate = 20
 
 let timer
 
