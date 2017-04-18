@@ -8,6 +8,11 @@ $('form').submit(function(){
   $('#m').val('');
   return false;
 });
+
+$('#start-game').click(function() {
+  socket.emit('start game', {})
+})
+
 socket.on('join', function(clientName){
   if (!myId) myId = clientName
   $('#messages').append($('<li>').text(`client joined: ${clientName}`));
@@ -17,3 +22,8 @@ socket.on('chat message', function(msg){
   $('#messages').append($('<li>').text(`${msg.id}: ${msg.msg}`));
   window.scrollTo(0, document.body.scrollHeight);
 });
+
+socket.on('next frame', function(frame) {
+  const { frameIdx, world, youAreDead, players } = frame
+  console.log(frameIdx, players)
+})

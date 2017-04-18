@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 app.get('/', function(req, res){
   res.sendFile(path.resolve(__dirname + '/../client/index.html'))
-});
+})
 
 app.use(express.static(path.resolve(__dirname + '/../../dist')))
 
@@ -19,19 +19,18 @@ const DOWN = 'DOWN'
 const LEFT = 'LEFT'
 const RIGHT = 'RIGHT'
 const worldSize = [200, 100]
+const frameRate = 1000
+
+let timer
 
 let state = {
   world: null,
   players: [],
   lastPlayerId: 0,
   running: false,
+  frameIdx: 0,
 }
 
-app.get('/start', (req, res) => {
-  // res.sendFile(__dirname + '/game.html');
-  startGameLoop()
-  res.send('started')
-})
 
 
 function getInitialPosition(idx, numberOfPlayers) {
@@ -72,20 +71,33 @@ function startGameLoop() {
   for (const playerIdx in state.players) {
     const player = state.players[playerIdx]
     const { heading, position } = getInitialPosition(playerIdx, state.players.length)
-    player.positions.push(position)
+    player.position = position
     player.heading = heading
 
     console.log(player.id, position, heading)
   }
 
-  // TODO: set to true
-  while (false) {
-    // update positions
-    // check for collisions
-    // remove lost players
-    // notifiy players
-    // sleep
-  }
+  timer = setInterval(gameLoop, frameRate)
+}
+
+function gameLoop() {
+  // update positions
+  // check for collisions
+  // remove lost players
+  const youAreDead = false
+  console.log('frame', state.frameIdx)
+  state.players
+    .filter(p => p.state)
+    .forEach((player) => {
+      console.log('in gameloop', player)
+      player.socket.emit('next frame', {
+        frameIdx: state.frameIdx,
+        world: state.world,
+        youAreDead,
+        players: state.players.map(p => ({ id: p.id, position: p.position, heading: p.heading })),
+      })
+    })
+  state.frameIdx++
 }
 
 io.on('connection', function(socket){
@@ -97,7 +109,7 @@ io.on('connection', function(socket){
   state.players.push({
     socket,
     id: playerId,
-    positions: [],
+    position: null,
     heading: null,
     playing: true,
   })
@@ -109,6 +121,7 @@ io.on('connection', function(socket){
   socket.on('disconnect', () => {
     state.players.forEach((player) => {
       if (player.socket === socket) {
+        console.log('disconnected client', player.id)
         player.socket = null
         player.playing = false
       }
@@ -116,8 +129,12 @@ io.on('connection', function(socket){
   })
 
   socket.on('player movement', (event) => {
-    const { id, direction } = event
+    const { playerId, direction } = event
     // handle direction
+  })
+
+  socket.on('start game', () => {
+    if (!state.running) startGameLoop()
   })
 })
 
