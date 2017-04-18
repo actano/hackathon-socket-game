@@ -61,8 +61,11 @@ function getInitialPosition(idx, numberOfPlayers) {
 }
 
 function initializeWorld(size) {
-  const world = new Array(size[0])
-  return world.map(() => new Array(size[1]).fill(null))
+  let world = new Array(size[1]).fill(null)
+  world.forEach((_, x) => {
+    world[x] = new Array(size[0]).fill(null)
+  })
+  return world
 }
 
 function startGameLoop() {
@@ -89,7 +92,7 @@ function gameLoop() {
   state.players
     .filter(p => p.socket)
     .forEach((player) => {
-      console.log('in gameloop', player)
+      // console.log('in gameloop', player)
       player.socket.emit('next frame', {
         frameIdx: state.frameIdx,
         world: state.world,
