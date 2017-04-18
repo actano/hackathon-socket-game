@@ -87,7 +87,7 @@ function gameLoop() {
   const youAreDead = false
   console.log('frame', state.frameIdx)
   state.players
-    .filter(p => p.state)
+    .filter(p => p.socket)
     .forEach((player) => {
       console.log('in gameloop', player)
       player.socket.emit('next frame', {
