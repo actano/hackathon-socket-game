@@ -18,7 +18,7 @@ const UP = 'UP'
 const DOWN = 'DOWN'
 const LEFT = 'LEFT'
 const RIGHT = 'RIGHT'
-const worldSize = [100, 100]
+const worldSize = [200, 100]
 
 let state = {
   world: null,
@@ -35,30 +35,31 @@ app.get('/start', (req, res) => {
 
 
 function getInitialPosition(idx, numberOfPlayers) {
-  // const [ maxX, maxY ] = state.worldSize
-  const maxX = worldSize[0]
-  const maxY = worldSize[1]
+  const [ maxX, maxY ] = worldSize
   const availableStartPositions = (maxX - 1)*2 + (maxY - 1)*2
-  const positionsPerEdge = availableStartPositions / 4
-  let position = idx/numberOfPlayers
-  if (position < positionsPerEdge) {
-    return [position * maxX/positionsPerEdge, 0]
+  let position = Math.floor(idx/numberOfPlayers*availableStartPositions + maxX/2)
+
+  if (position < maxX) {
+    return { heading: DOWN, position: [position, 0] }
   }
-  position -= positionsPerEdge
-  if (position < positionsPerEdge) {
-    return [maxX, position * maxY/positionsPerEdge]
+  position -= maxX
+  if (position < maxY) {
+    return { heading: LEFT, position: [maxX-1, position] }
   }
 
-  position -= positionsPerEdge
-  if (position < positionsPerEdge) {
-    return [positionsPerEdge - position * maxX/positionsPerEdge, maxY]
+  position -= maxY
+  if (position < maxX) {
+    return { heading: UP, position: [maxX - position, maxY-1] }
   }
 
-  position -= positionsPerEdge
-  return [0, positionsPerEdge - position * maxY/positionsPerEdge]
+  position -= maxX
+  if (position < maxX) {
+    return { heading: RIGHT, position: [0, maxY - position] }
+  }
+
+  position -= maxY
+  return { heading: DOWN, position: [position, 0] }
 }
-
-function getInitialHeading() { return UP }
 
 function initializeWorld(size) {
   const world = new Array(size[0])
@@ -70,11 +71,11 @@ function startGameLoop() {
   state.running = true
   for (const playerIdx in state.players) {
     const player = state.players[playerIdx]
-    const position = getInitialPosition(playerIdx, state.players.length)
+    const { heading, position } = getInitialPosition(playerIdx, state.players.length)
     player.positions.push(position)
-    player.heading = getInitialHeading(position)
+    player.heading = heading
 
-    console.log(player.id, position)
+    console.log(player.id, position, heading)
   }
 
   // TODO: set to true
@@ -93,7 +94,6 @@ io.on('connection', function(socket){
   }
 
   const playerId = state.lastPlayerId
-  console.log(state)
   state.players.push({
     socket,
     id: playerId,
@@ -101,6 +101,7 @@ io.on('connection', function(socket){
     heading: null,
     playing: true,
   })
+  console.log('connected:', playerId)
 
   io.emit('join', `${playerId}`)
   state.lastPlayerId = playerId + 1
