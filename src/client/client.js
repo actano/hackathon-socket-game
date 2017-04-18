@@ -24,6 +24,9 @@ for (let x = 0; x < 100; x++) {
   playerColors[x][2] = getRandomInt(0, 255)
 }
 
+const updatePlayerList = players =>
+  renderPlayerList(myId, players)
+
 $(document).keydown((event) => {
   const key = keyCodes[event.key]
   if (key) {
@@ -54,13 +57,13 @@ socket.on('player joined', function(event){
     myId = playerId
     console.log(myId)
   }
-  renderPlayerList(players)
+  updatePlayerList(players)
 });
 
 socket.on('player left', function(event){
   const { id, players } = event
   console.log(`player ${id} disconnected`)
-  renderPlayerList(players)
+  updatePlayerList(players)
 });
 
 function getRandomInt(min, max) {
@@ -109,7 +112,7 @@ socket.on('next frame', function(frame) {
           buffer[pos+3] = 128;           // set alpha channel
         }
     }
-    renderPlayerList(players)
+    updatePlayerList(players)
   }
 
   for(var playerHeads = 0; playerHeads < players.length; playerHeads++) {
