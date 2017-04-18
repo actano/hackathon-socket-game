@@ -1,13 +1,10 @@
 import $ from 'jquery'
 import io from 'socket.io-client'
 
+import { renderPlayerList } from './player-list'
+
 const socket = io(window.location.href)
 var myId = null;
-$('form').submit(function(){
-  socket.emit('chat message', { id: myId, msg: $('#m').val() });
-  $('#m').val('');
-  return false;
-});
 
 const keyCodes = {
   ArrowLeft: 'LEFT',
@@ -57,8 +54,12 @@ socket.on('player joined', function(event){
     myId = playerId
     console.log(myId)
   }
-  $('#messages').append($('<li>').text(`client joined: ${playerId}`));
-  window.scrollTo(0, document.body.scrollHeight);
+  renderPlayerList(players)
+});
+
+socket.on('disconnected client', function(event){
+  const { players } = event
+  renderPlayerList(players)
 });
 
 function getRandomInt(min, max) {
@@ -107,7 +108,8 @@ socket.on('next frame', function(frame) {
           buffer[pos+3] = 128;           // set alpha channel
         }
     }
-}
+    renderPlayerList(players)
+  }
 
   for(var playerHeads = 0; playerHeads < players.length; playerHeads++) {
     let [x, y] = players[playerHeads].position;
@@ -131,3 +133,4 @@ socket.on('next frame', function(frame) {
   ctx.putImageData(idata, 0, 0);
   // console.log(frameIdx, players)
 })
+

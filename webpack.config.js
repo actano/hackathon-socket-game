@@ -9,10 +9,14 @@ module.exports = {
     filename: 'bundle.js',
   },
 
+  resolve: {
+    extensions: ['', '.js', '.jsx']
+  },
+
   module: {
     loaders: [
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         loaders: ['babel'],
         include: path.join(__dirname, 'src'),
       },

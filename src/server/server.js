@@ -156,10 +156,28 @@ function gameLoop() {
         frameIdx: state.frameIdx,
         world: state.world,
         youAreDead: !player.playing,
-        players: state.players.map(p => ({ id: p.id, position: p.position, heading: p.heading })),
+        players: state.players.map(p => ({
+          id: p.id,
+          position: p.position,
+          heading: p.heading,
+          playing: p.playing,
+        })),
       })
     })
   state.frameIdx++
+}
+
+const connectionEvent = (eventType, playerId) => {
+  io.emit(eventType, {
+    playerId,
+    players: connectedPlayers().map(p => ({
+      id: p.id,
+      position: p.position,
+      heading: p.heading,
+      playing: p.playing,
+    })),
+    running: state.running,
+  })
 }
 
 io.on('connection', function(socket){
@@ -173,7 +191,7 @@ io.on('connection', function(socket){
   })
   console.log('connected:', playerId)
 
-  io.emit('player joined', { playerId, players: connectedPlayers().map(p => p.id), running: state.running })
+  connectionEvent('player joined', playerId)
   state.lastPlayerId = playerId + 1
 
   socket.on('disconnect', () => {
@@ -183,7 +201,7 @@ io.on('connection', function(socket){
         player.socket = null
         player.playing = false
 
-        io.emit('player disconnected', { playerId: player.id, players: connectedPlayers().map(p => p.id) })
+        connectionEvent('player disconnected', player.id)
       }
     })
   })
