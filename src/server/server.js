@@ -192,6 +192,7 @@ io.on('connection', function(socket){
   })
   console.log('connected:', playerId)
 
+  socket.emit('assign player id', { id: playerId })
   connectionEvent('player joined', playerId)
   state.lastPlayerId = playerId + 1
 

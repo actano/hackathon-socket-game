@@ -51,12 +51,13 @@ socket.on('game over', (event) => {
   alert(`Player ${winner} won! More luck next time.`)
 })
 
+socket.on('assign player id', ({ id }) => {
+  myId = id
+  console.log(`assign player id ${myId}`)
+})
+
 socket.on('player joined', function(event){
-  const { playerId, players, running } = event
-  if (!myId) {
-    myId = playerId
-    console.log(myId)
-  }
+  const { players } = event
   updatePlayerList(players)
 });
 
