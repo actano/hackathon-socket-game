@@ -10,14 +10,14 @@ $('form').submit(function(){
 });
 
 const keyCodes = {
-  37: 'LEFT',
-  38: 'UP',
-  39: 'RIGHT',
-  40: 'DOWN'
+  ArrowLeft: 'LEFT',
+  ArrowUp: 'UP',
+  ArrowRight: 'RIGHT',
+  ArrowDown: 'DOWN'
 }
 
-$(document).keypress((event) => {
-  const key = keyCodes[event.keyCode]
+$(document).keydown((event) => {
+  const key = keyCodes[event.key]
   if (key) {
     socket.emit('player movement', { playerId: myId, direction: key })
   }
@@ -25,6 +25,19 @@ $(document).keypress((event) => {
 
 $('#start-game').click(function() {
   socket.emit('start game', {})
+})
+
+socket.on('game over', (event) => {
+  const { winner } = event
+  if (winner === myId) {
+    alert(`You won! Congratulations!`)
+    return
+  }
+  if (winner === 0) {
+    alert(`Everyone lost! Too bad.`)
+    return
+  }
+  alert(`Player ${winner} won! More luck next time.`)
 })
 
 socket.on('join', function(playerId){

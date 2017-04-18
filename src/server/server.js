@@ -19,7 +19,7 @@ const DOWN = 'DOWN'
 const LEFT = 'LEFT'
 const RIGHT = 'RIGHT'
 const worldSize = [200, 100]
-const frameRate = 1000
+const frameRate = 200
 
 let timer
 
@@ -87,9 +87,19 @@ function startGameLoop() {
   timer = setInterval(gameLoop, frameRate)
 }
 
+function getWinner() {
+  const winner = activePlayers()
+  return winner.length ? winner.id : 0
+}
+
 function stopGameLoop() {
   clearInterval(timer)
   // send to all clients 
+  const winner = getWinner()
+  state.players.filter(p => p.socket)
+    .forEach(p => {
+      p.socket.emit('game over', { winner })
+    })
 }
 
 const directionIncrement = {
