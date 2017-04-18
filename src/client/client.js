@@ -17,6 +17,7 @@ const keyCodes = {
 }
 
 var canvas = document.getElementById('board');
+var playerIcon = document.getElementById('player');
 
 let playerColors = new Array(100).fill(null)
 for (let x = 0; x < 100; x++) {
@@ -69,6 +70,14 @@ function getRandomInt(min, max) {
 socket.on('next frame', function(frame) {
   const { frameIdx, world, youAreDead, players } = frame
   const myself = players.find(p => (p.id === myId))
+
+  let playerIdx = -1;
+  for (let player = 0; player < players.length; player++) {
+    if (players[player].id == myId) {
+      playerIdx = player;
+    }
+  }
+  playerIcon.style.backgroundColor = "rgb("+playerColors[playerIdx][0]+", "+playerColors[playerIdx][1]+", "+playerColors[playerIdx][2]+")"
   console.log(frameIdx, myself.position, 'dead?', youAreDead)
 
   // console.log("World", world)
