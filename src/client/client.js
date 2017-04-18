@@ -20,7 +20,6 @@ $(document).keypress((event) => {
   const key = keyCodes[event.keyCode]
   if (key) {
     socket.emit('player movement', { playerId: myId, direction: key })
-    console.log(`sent direction ${key}`)
   }
 })
 
@@ -28,9 +27,12 @@ $('#start-game').click(function() {
   socket.emit('start game', {})
 })
 
-socket.on('join', function(clientName){
-  if (!myId) myId = clientName
-  $('#messages').append($('<li>').text(`client joined: ${clientName}`));
+socket.on('join', function(playerId){
+  if (!myId) {
+    myId = playerId
+    console.log(myId)
+  }
+  $('#messages').append($('<li>').text(`client joined: ${playerId}`));
   window.scrollTo(0, document.body.scrollHeight);
 });
 socket.on('chat message', function(msg){
@@ -40,5 +42,6 @@ socket.on('chat message', function(msg){
 
 socket.on('next frame', function(frame) {
   const { frameIdx, world, youAreDead, players } = frame
-  console.log(frameIdx, players)
+  const myself = players.find(p => (p.id === myId))
+  console.log(frameIdx, myself.position, 'dead?', youAreDead)
 })

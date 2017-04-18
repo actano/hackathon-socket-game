@@ -26,7 +26,7 @@ let timer
 let state = {
   world: null,
   players: [],
-  lastPlayerId: 0,
+  lastPlayerId: 1,
   running: false,
   frameIdx: 0,
 }
@@ -61,9 +61,9 @@ function getInitialPosition(idx, numberOfPlayers) {
 }
 
 function initializeWorld(size) {
-  let world = new Array(size[1]).fill(null)
+  let world = new Array(size[0]).fill(null)
   world.forEach((_, x) => {
-    world[x] = new Array(size[0]).fill(null)
+    world[x] = new Array(size[1]).fill(null)
   })
   return world
 }
@@ -77,18 +77,68 @@ function startGameLoop() {
     player.position = position
     player.heading = heading
 
+    const [x, y] = position
+    console.log(x, y)
+    state.world[x][y] = player.id
+
     console.log(player.id, position, heading)
   }
 
   timer = setInterval(gameLoop, frameRate)
 }
 
+function stopGameLoop() {
+  clearInterval(timer)
+  // send to all clients 
+}
+
+const directionIncrement = {
+  [UP]: [0, -1],
+  [DOWN]: [0, 1],
+  [LEFT]: [-1, 0],
+  [RIGHT]: [1, 0],
+}
+
+function isInRange(a, max) {
+  return 0 <= a && a < max
+}
+
+function activePlayers() {
+  return state.players.filter(p => p.playing)
+}
+
+function calculateNextFrame() {
+  activePlayers()
+    .forEach((player) => {
+      const inc = directionIncrement[player.heading]
+
+      player.position[0] += inc[0]
+      player.position[1] += inc[1]
+
+      const [x, y] = player.position
+      const [maxX, maxY] = worldSize
+
+      if (!isInRange(x, maxX) || !isInRange(y, maxY) || state.world[x][y]) {
+        // collision!
+        player.playing = false
+        return
+      }
+
+      state.world[x][y] = player.id
+    })
+
+  const activePlayerCount = activePlayers().length
+  if (activePlayerCount <= 1) {
+    stopGameLoop()
+  }
+}
+
 function gameLoop() {
-  // update positions
+  calculateNextFrame()
   // check for collisions
   // remove lost players
-  const youAreDead = false
   console.log('frame', state.frameIdx)
+  console.log('active players', activePlayers().map(p => p.id))
   state.players
     .filter(p => p.socket)
     .forEach((player) => {
@@ -96,7 +146,7 @@ function gameLoop() {
       player.socket.emit('next frame', {
         frameIdx: state.frameIdx,
         world: state.world,
-        youAreDead,
+        youAreDead: !player.playing,
         players: state.players.map(p => ({ id: p.id, position: p.position, heading: p.heading })),
       })
     })
@@ -118,7 +168,7 @@ io.on('connection', function(socket){
   })
   console.log('connected:', playerId)
 
-  io.emit('join', `${playerId}`)
+  io.emit('join', playerId)
   state.lastPlayerId = playerId + 1
 
   socket.on('disconnect', () => {
@@ -134,7 +184,8 @@ io.on('connection', function(socket){
   socket.on('player movement', (event) => {
     const { playerId, direction } = event
     console.log('movement event', playerId, direction)
-    // handle direction
+    const player = state.players.find(p => p.id === playerId)
+    player.heading = direction
   })
 
   socket.on('start game', () => {
