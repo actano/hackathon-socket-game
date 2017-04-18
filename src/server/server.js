@@ -130,6 +130,7 @@ io.on('connection', function(socket){
 
   socket.on('player movement', (event) => {
     const { playerId, direction } = event
+    console.log('movement event', playerId, direction)
     // handle direction
   })
 

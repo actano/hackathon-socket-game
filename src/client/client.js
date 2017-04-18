@@ -9,6 +9,21 @@ $('form').submit(function(){
   return false;
 });
 
+const keyCodes = {
+  37: 'LEFT',
+  38: 'UP',
+  39: 'RIGHT',
+  40: 'DOWN'
+}
+
+$(document).keypress((event) => {
+  const key = keyCodes[event.keyCode]
+  if (key) {
+    socket.emit('player movement', { playerId: myId, direction: key })
+    console.log(`sent direction ${key}`)
+  }
+})
+
 $('#start-game').click(function() {
   socket.emit('start game', {})
 })
