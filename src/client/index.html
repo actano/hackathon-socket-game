@@ -5,16 +5,17 @@
     <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { font: 13px Helvetica, Arial; background-color: #DDDDDD;} form { background: #000; padding: 3px; position: fixed; bottom: 0;
     width: 100%; } form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; } form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; } #messages {
     list-style-type: none; margin: 0; padding: 0; } #messages li { padding: 5px 10px; } #messages li:nth-child(odd) { background: #eee; } #messages { margin-bottom: 40px } #board {margin: 20px}
-#player {width: 200px; height: 50px; margin: 20px;}
+#player {width: 710px; height: 375px; margin: 20px;} #messages {width: 500px; margin: 20px;}
      </style>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <button id="start-game">Start the game</button><br>
 
-  Player: <div id="player"> </div>
+  <div id="player">
     <canvas id="board"
-            style="width: 1200px; height: 600px;"></canvas>
-    <script src="/bundle.js"></script>
-  </body>
+            style="width: 1000px; height: 500px;"></canvas>
+  </div>
+  <ul id="messages"></ul>
+  <button id="start-game">Start the game</button><br>
+  <script src="/bundle.js"></script>
+</body>
 </html>
