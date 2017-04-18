@@ -50,7 +50,8 @@ socket.on('game over', (event) => {
   alert(`Player ${winner} won! More luck next time.`)
 })
 
-socket.on('join', function(playerId){
+socket.on('player joined', function(event){
+  const { playerId, players, running } = event
   if (!myId) {
     myId = playerId
     console.log(myId)

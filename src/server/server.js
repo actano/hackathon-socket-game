@@ -89,12 +89,12 @@ function startGameLoop() {
 
 function getWinner() {
   const winner = activePlayers()
-  return winner.length ? winner.id : 0
+  return winner.length ? winner[0].id : 0
 }
 
 function stopGameLoop() {
   clearInterval(timer)
-  // send to all clients 
+  // send to all clients
   const winner = getWinner()
   state.players.filter(p => p.socket)
     .forEach(p => {
@@ -115,6 +115,10 @@ function isInRange(a, max) {
 
 function activePlayers() {
   return state.players.filter(p => p.playing)
+}
+
+function connectedPlayers() {
+  return state.players.filter(p => p.socket)
 }
 
 function calculateNextFrame() {
@@ -145,14 +149,9 @@ function calculateNextFrame() {
 
 function gameLoop() {
   calculateNextFrame()
-  // check for collisions
-  // remove lost players
-  console.log('frame', state.frameIdx)
-  console.log('active players', activePlayers().map(p => p.id))
-  state.players
-    .filter(p => p.socket)
+  console.log('frame', state.frameIdx, 'active players', activePlayers().map(p => p.id))
+  connectedPlayers()
     .forEach((player) => {
-      // console.log('in gameloop', player)
       player.socket.emit('next frame', {
         frameIdx: state.frameIdx,
         world: state.world,
@@ -164,21 +163,17 @@ function gameLoop() {
 }
 
 io.on('connection', function(socket){
-  if (state.running) {
-    return
-  }
-
   const playerId = state.lastPlayerId
   state.players.push({
     socket,
     id: playerId,
     position: null,
     heading: null,
-    playing: true,
+    playing: !state.running,
   })
   console.log('connected:', playerId)
 
-  io.emit('join', playerId)
+  io.emit('player joined', { playerId, players: connectedPlayers().map(p => p.id), running: state.running })
   state.lastPlayerId = playerId + 1
 
   socket.on('disconnect', () => {
@@ -187,6 +182,8 @@ io.on('connection', function(socket){
         console.log('disconnected client', player.id)
         player.socket = null
         player.playing = false
+
+        io.emit('player disconnected', { playerId: player.id, players: connectedPlayers().map(p => p.id) })
       }
     })
   })
@@ -199,6 +196,7 @@ io.on('connection', function(socket){
   })
 
   socket.on('start game', () => {
+    io.emit('game started', {})
     if (!state.running) startGameLoop()
   })
 })
