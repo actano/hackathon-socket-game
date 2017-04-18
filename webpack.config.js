@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
 
-  entry: './src/client/client.js',
+  entry: ['babel-polyfill', './src/client/client.js'],
 
   output: {
     path: './dist',
