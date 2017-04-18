@@ -57,8 +57,9 @@ socket.on('player joined', function(event){
   renderPlayerList(players)
 });
 
-socket.on('disconnected client', function(event){
-  const { players } = event
+socket.on('player left', function(event){
+  const { id, players } = event
+  console.log(`player ${id} disconnected`)
   renderPlayerList(players)
 });
 

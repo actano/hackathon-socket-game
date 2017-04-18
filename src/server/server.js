@@ -196,15 +196,15 @@ io.on('connection', function(socket){
   state.lastPlayerId = playerId + 1
 
   socket.on('disconnect', () => {
-    state.players.forEach((player) => {
-      if (player.socket === socket) {
-        console.log('disconnected client', player.id)
-        player.socket = null
-        player.playing = false
-
-        connectionEvent('player disconnected', player.id)
-      }
-    })
+    const playerIdx = state.players.findIndex(p => p.socket === socket)
+    const player = state.players[playerIdx]
+    console.log('disconnected client', player.id)
+    player.socket = null
+    player.playing = false
+    if (!state.running) {
+      state.players.splice(playerIdx, 1)
+    }
+    connectionEvent('player left', playerId)
   })
 
   socket.on('player movement', (event) => {
