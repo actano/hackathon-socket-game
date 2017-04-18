@@ -27,9 +27,8 @@ for (let x = 0; x < 100; x++) {
 }
 
 $(document).keydown((event) => {
-  const key = keyCodes[event.keyCode]
+  const key = keyCodes[event.key]
   if (key) {
-    console.log(key)
     socket.emit('player movement', { playerId: myId, direction: key })
   }
 })
@@ -120,5 +119,5 @@ socket.on('next frame', function(frame) {
   // update canvas with new data
   ctx.imageSmoothingEnabled = false;
   ctx.putImageData(idata, 0, 0);
-  console.log(frameIdx, players)
+  // console.log(frameIdx, players)
 })
