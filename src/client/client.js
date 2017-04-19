@@ -59,14 +59,16 @@ socket.on('assign player id', ({ id }) => {
 })
 
 socket.on('player joined', function(event){
-  const { players } = event
+  const { players, world } = event
   updatePlayerList(players)
+  drawFrame(world, players)
 });
 
 socket.on('player left', function(event){
-  const { id, players } = event
+  const { id, players, world } = event
   console.log(`player ${id} disconnected`)
   updatePlayerList(players)
+  drawFrame(world, players)
 });
 
 const NO_PLAYER_COLOR = [127, 127, 127]
@@ -86,6 +88,10 @@ const toCssRGB = rgbArray =>
 
 socket.on('next frame', function(frame) {
   const { frameIdx, world, youAreDead, players } = frame
+  drawFrame(world, players)
+})
+
+const drawFrame = (world, players) => {
   updatePlayerList(players)
   const myself = state.playerById[myId]
   playerIcon.style.backgroundColor = toCssRGB(getPlayerColor(myId))
@@ -132,5 +138,5 @@ socket.on('next frame', function(frame) {
   // update canvas with new data
   ctx.imageSmoothingEnabled = false;
   ctx.putImageData(idata, 0, 0);
-})
+}
 

@@ -70,21 +70,7 @@ function initializeWorld(size) {
 }
 
 function startGameLoop() {
-  state.world = initializeWorld(worldSize)
   state.running = true
-  for (const playerIdx in state.players) {
-    const player = state.players[playerIdx]
-    const { heading, position } = getInitialPosition(playerIdx, state.players.length)
-    player.position = position
-    player.heading = heading
-
-    const [x, y] = position
-    console.log(x, y)
-    state.world[x][y] = player.id
-
-    console.log(player.id, position, heading)
-  }
-
   timer = setInterval(gameLoop, frameRate)
 }
 
@@ -172,9 +158,24 @@ function gameLoop() {
 }
 
 const connectionEvent = (eventType, playerId) => {
+  state.world = initializeWorld(worldSize)
+  for (const playerIdx in state.players) {
+    const player = state.players[playerIdx]
+    const { heading, position } = getInitialPosition(playerIdx, state.players.length)
+    player.position = position
+    player.heading = heading
+
+    const [x, y] = position
+    console.log(x, y)
+    state.world[x][y] = player.id
+
+    console.log(player.id, position, heading)
+  }
+
   io.emit(eventType, {
     playerId,
     players: connectedPlayers().map(playerStatus),
+    world: state.world,
     running: state.running,
   })
 }
