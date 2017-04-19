@@ -30,7 +30,7 @@ let state = {
   world: null,
   players: [],
   lastPlayerId: 1,
-  running: false,
+  phase: 'lobby',
   frameIdx: 0,
 }
 
@@ -72,7 +72,8 @@ function initializeWorld(size) {
 }
 
 function startGameLoop() {
-  state.running = true
+  state.phase = 'running'
+  state.frameIdx = 0
   timer = setInterval(gameLoop, frameRate)
 }
 
@@ -84,11 +85,6 @@ function getWinner() {
 function stopGameLoop() {
   clearInterval(timer)
   // send to all clients
-  const winner = getWinner()
-  state.players.filter(p => p.socket)
-    .forEach(p => {
-      p.socket.emit('game over', { winner })
-    })
 }
 
 const directionIncrement = {
@@ -133,6 +129,12 @@ function calculateNextFrame() {
   const activePlayerCount = activePlayers().length
   if (activePlayerCount <= 1) {
     stopGameLoop()
+    state.phase = 'end'
+    const winner = getWinner()
+    state.players.filter(p => p.socket)
+      .forEach(p => {
+        p.socket.emit('game over', { winner })
+      })
   }
 }
 
@@ -160,7 +162,7 @@ function gameLoop() {
   state.frameIdx++
 }
 
-const connectionEvent = (eventType, playerId) => {
+const resetWorld = () => {
   state.world = initializeWorld(worldSize)
   for (const playerIdx in state.players) {
     const player = state.players[playerIdx]
@@ -174,12 +176,15 @@ const connectionEvent = (eventType, playerId) => {
 
     console.log(player.id, position, heading)
   }
+}
 
+const connectionEvent = (eventType, playerId) => {
+  resetWorld()
   io.emit(eventType, {
     playerId,
     players: connectedPlayers().map(playerStatus),
     world: state.world,
-    running: state.running,
+    phase: state.phase,
   })
 }
 
@@ -210,7 +215,7 @@ io.on('connection', function(socket){
     position: null,
     heading: null,
     name: createName(),
-    playing: !state.running,
+    playing: state.phase !== 'running',
     color: randomColor(),
   })
   console.log('connected:', playerId)
@@ -225,7 +230,7 @@ io.on('connection', function(socket){
     console.log('disconnected client', player.id)
     player.socket = null
     player.playing = false
-    if (!state.running) {
+    if (state.phase !== 'running') {
       state.players.splice(playerIdx, 1)
     }
     connectionEvent('player left', playerId)
@@ -239,8 +244,19 @@ io.on('connection', function(socket){
   })
 
   socket.on('start game', () => {
+    if (state.phase !== 'lobby') return
     io.emit('game started', {})
-    if (!state.running) startGameLoop()
+    startGameLoop()
+  })
+
+  socket.on('start lobby', () => {
+    if (state.phase === 'running') stopGameLoop()
+    resetWorld()
+    state.players.forEach((player) => {
+      player.playing = true
+    })
+    state.phase = 'lobby'
+    connectionEvent('lobby started', playerId)
   })
 
   socket.on('change name', (event) => {

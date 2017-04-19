@@ -10,9 +10,11 @@ const scaleFactor = 4
 const socket = io(window.location.href)
 var myId = null;
 let myColor = null
+let winnerId = null
 const state = {
   players: [],
   playerById: {},
+  phase: 'lobby',
 }
 
 const keyCodes = {
@@ -26,6 +28,34 @@ var canvas = document.getElementById('board');
 var playerIcon = document.getElementById('player');
 
 const nameInput = document.getElementById('name')
+
+const updateButton = () => {
+  if (state.phase === 'lobby') {
+    $('#start-lobby').hide()
+    $('#start-game').show()
+    document.body.style.backgroundColor = '#ddd'
+    return
+  }
+  if (state.phase === 'running') {
+    $('#start-lobby').show()
+    $('#start-game').hide()
+    document.body.style.backgroundColor = '#888'
+    return
+  }
+  if (state.phase === 'end') {
+    $('#start-lobby').show()
+    $('#start-game').hide()
+    if (myId === winnerId) {
+      document.body.style.backgroundColor = '#EFC'
+    } else {
+      document.body.style.backgroundColor = '#A77'
+    }
+    return
+  }
+  $('#start-lobby').hide()
+  $('#start-game').hide()
+  document.body.style.backgroundColor = '#888'
+}
 
 const updatePlayerList = players => {
   players.forEach(player => state.playerById[player.id] = player)
@@ -46,7 +76,15 @@ $(document).keydown((event) => {
 })
 
 $('#start-game').click(function() {
+  state.phase = 'running'
+  updateButton()
   socket.emit('start game', {})
+})
+
+$('#start-lobby').click(function() {
+  state.phase = 'lobby'
+  updateButton()
+  socket.emit('start lobby', {})
 })
 
 $('#change-color').click(function() {
@@ -65,6 +103,9 @@ $('#name').keyup(function(event) {
 
 socket.on('game over', (event) => {
   const { winner } = event
+  state.phase = 'end'
+  winnerId = winner
+  updateButton()
   if (winner === myId) {
     alert(`You won! Congratulations!`)
     return
@@ -89,23 +130,45 @@ socket.on('assign player id', ({ id }) => {
 })
 
 socket.on('player joined', function(event){
-  const { players, world } = event
+  const { players, world, phase } = event
+  state.phase = phase
+  updateButton()
   updatePlayerList(players)
   drawFrame(world, players)
 });
 
 socket.on('player left', function(event){
-  const { id, players, world } = event
+  const { id, players, world, phase } = event
+  state.phase = phase
+  updateButton()
   console.log(`player ${id} disconnected`)
   updatePlayerList(players)
   drawFrame(world, players)
 });
 
 socket.on('player changed', function(event){
-  const { id, players, world } = event
+  const { id, players, world, phase } = event
+  state.phase = phase
+  updateButton()
   console.log(`player ${id} changed`)
   updatePlayerList(players)
   drawFrame(world, players)
+});
+
+socket.on('game started', function(event){
+  state.phase = 'running'
+  winnerId = null
+  updateButton()
+  console.log(`game started`)
+});
+
+socket.on('lobby started', function(event){
+  const { id, players, world, phase } = event
+  state.phase = phase
+  updateButton()
+  updatePlayerList(players)
+  drawFrame(world, players)
+  console.log(`lobby started`)
 });
 
 const NO_PLAYER_COLOR = [127, 127, 127]
