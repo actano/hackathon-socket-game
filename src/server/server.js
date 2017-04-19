@@ -148,6 +148,14 @@ function calculateNextFrame() {
   }
 }
 
+const playerStatus = ({ id, position, heading, playing, color }) => ({
+  color,
+  heading,
+  id,
+  playing,
+  position,
+})
+
 function gameLoop() {
   calculateNextFrame()
   console.log('frame', state.frameIdx, 'active players', activePlayers().map(p => p.id))
@@ -157,12 +165,7 @@ function gameLoop() {
         frameIdx: state.frameIdx,
         world: state.world,
         youAreDead: !player.playing,
-        players: state.players.map(p => ({
-          id: p.id,
-          position: p.position,
-          heading: p.heading,
-          playing: p.playing,
-        })),
+        players: state.players.map(playerStatus),
       })
     })
   state.frameIdx++
@@ -171,15 +174,23 @@ function gameLoop() {
 const connectionEvent = (eventType, playerId) => {
   io.emit(eventType, {
     playerId,
-    players: connectedPlayers().map(p => ({
-      id: p.id,
-      position: p.position,
-      heading: p.heading,
-      playing: p.playing,
-    })),
+    players: connectedPlayers().map(playerStatus),
     running: state.running,
   })
 }
+
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+const randomColor = () =>
+  [
+    getRandomInt(0, 255),
+    getRandomInt(0, 255),
+    getRandomInt(0, 255),
+  ]
 
 io.on('connection', function(socket){
   const playerId = state.lastPlayerId
@@ -189,6 +200,7 @@ io.on('connection', function(socket){
     position: null,
     heading: null,
     playing: !state.running,
+    color: randomColor(),
   })
   console.log('connected:', playerId)
 

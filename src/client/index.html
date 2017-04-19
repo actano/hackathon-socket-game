@@ -5,13 +5,29 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; background-color: #DDDDDD;}
-      #player {width: 710px; height: 375px; margin: 20px;}
-      #board {width: 1000px; height: 500px;}
+      #player {
+        display: inline-block;
+        margin: 20px;
+        border: solid 1px #000;
+        padding: 10px;
+      }
+      #board {
+        border: solid 1px #000;
+        image-rendering: pixelated;
+      }
       .player-list {
+        border-collapse:collapse;
+      }
+      .player-list tr {
+        border:1px solid #888;
+        padding:0px 4px;
+        margin-bottom:-1px;
+        margin-right: -1px;
+        background-color: #eee;
       }
       .player {
-        display:flex;
-        flex-direction: row;
+      }
+      .player td {
         border:1px solid #888;
         padding:0px 4px;
         margin-bottom:-1px;
@@ -21,27 +37,25 @@
         font-weight: bolder;
       }
       .player_id {
-        width: 30px;
       }
       .player_type {
-        width: 80px;
       }
       .player_pos {
-        width: 200px;
       }
       .player_head {
-        width: 150px;
+      }
+      button {
+        padding: 2px 6px;
       }
      </style>
   </head>
   <body>
-
-  <div id="players"></div>
-  <div id="player">
-    <canvas id="board"></canvas>
-  </div>
-  <ul id="messages"></ul>
-  <button id="start-game">Start the game</button><br>
-  <script src="/bundle.js"></script>
-</body>
+    <div id="players"></div>
+    <button id="start-game">Start the game</button><br>
+    <div id="player">
+      <canvas id="board"></canvas>
+    </div>
+    <ul id="messages"></ul>
+    <script src="/bundle.js"></script>
+  </body>
 </html>
