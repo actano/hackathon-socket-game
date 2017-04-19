@@ -1,12 +1,15 @@
 import $ from 'jquery'
 import io from 'socket.io-client'
 
+import { randomColor } from '../shared/shared'
+
 import { renderPlayerList } from './player-list'
 
 const scaleFactor = 4
 
 const socket = io(window.location.href)
 var myId = null;
+let myColor = null
 const state = {
   players: [],
   playerById: {},
@@ -27,6 +30,7 @@ const nameInput = document.getElementById('name')
 const updatePlayerList = players => {
   players.forEach(player => state.playerById[player.id] = player)
   const myself = state.playerById[myId]
+  myColor = myself.color
   if (!nameInput.value) {
     nameInput.value = myself.name
   }
@@ -43,6 +47,12 @@ $(document).keydown((event) => {
 
 $('#start-game').click(function() {
   socket.emit('start game', {})
+})
+
+$('#change-color').click(function() {
+  myColor = randomColor()
+  console.log(`color changed ${myColor}`)
+  socket.emit('change color', { playerId: myId, color: myColor })
 })
 
 $('#name').keyup(function(event) {
@@ -73,6 +83,9 @@ socket.on('assign player id', ({ id }) => {
   if (existingName) {
     socket.emit('change name', {playerId: myId, name: nameInput.value})
   }
+  if (myColor) {
+    socket.emit('change color', {playerId: myId, color: myColor})
+  }
 })
 
 socket.on('player joined', function(event){
@@ -99,12 +112,6 @@ const NO_PLAYER_COLOR = [127, 127, 127]
 const getPlayerColor = (playerId) => {
   const player = state.playerById[playerId]
   return player ? player.color : NO_PLAYER_COLOR
-}
-
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
 }
 
 const toCssRGB = rgbArray =>

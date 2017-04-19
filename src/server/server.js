@@ -4,6 +4,8 @@ import { Server } from 'http'
 import socketIo from 'socket.io'
 import path from 'path'
 
+import { getRandomInt, randomColor } from '../shared/shared'
+
 const app = express()
 const http = Server(app);
 const io = socketIo(http);
@@ -181,19 +183,6 @@ const connectionEvent = (eventType, playerId) => {
   })
 }
 
-const getRandomInt = (min, max) => {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
-const randomColor = () =>
-  [
-    getRandomInt(0, 255),
-    getRandomInt(0, 255),
-    getRandomInt(0, 255),
-  ]
-
 const consonant = 'bcdfghjklmnpqrstvwxyz'
 const vocal = 'aeiou'
 
@@ -258,6 +247,15 @@ io.on('connection', function(socket){
     const { playerId, name } = event
     const player = state.players.find(p => p.id === playerId)
     player.name = name
+    connectionEvent('player changed', playerId)
+  })
+
+  socket.on('change color', (event) => {
+    const { playerId, color } = event
+    console.log(`color changed ${color} on player ${playerId}`)
+    const player = state.players.find(p => p.id === playerId)
+    player.color = color
+    console.log('###', player)
     connectionEvent('player changed', playerId)
   })
 })
