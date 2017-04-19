@@ -134,10 +134,11 @@ function calculateNextFrame() {
   }
 }
 
-const playerStatus = ({ id, position, heading, playing, color }) => ({
+const playerStatus = ({ id, position, heading, playing, color, name }) => ({
   color,
   heading,
   id,
+  name,
   playing,
   position,
 })
@@ -193,6 +194,25 @@ const randomColor = () =>
     getRandomInt(0, 255),
   ]
 
+const consonant = 'bcdfghjklmnpqrstvwxyz'
+const vocal = 'aeiou'
+
+const createName = () => {
+  const sylbs = getRandomInt(2, 5)
+  let name = ''
+  for(let i = 0; i < sylbs; ++i) {
+    if (getRandomInt(0, 5) === 0) {
+      name += vocal[getRandomInt(0, vocal.length)]
+    }
+    name += consonant[getRandomInt(0, consonant.length)]
+    name += vocal[getRandomInt(0, vocal.length)]
+    if (getRandomInt(0, 5) === 0) {
+      name += vocal[getRandomInt(0, vocal.length)]
+    }
+  }
+  return name
+}
+
 io.on('connection', function(socket){
   const playerId = state.lastPlayerId
   state.players.push({
@@ -200,6 +220,7 @@ io.on('connection', function(socket){
     id: playerId,
     position: null,
     heading: null,
+    name: createName(),
     playing: !state.running,
     color: randomColor(),
   })

@@ -13,6 +13,9 @@ const Player = ({ mySelf, player }) =>
         <span style={{color: '#fff'}}>{ mySelf ? 'X' : '' }</span>
         <span style={{color: '#000'}}>{ mySelf ? 'X' : '' }</span>
       </td>
+      <td className="player_name">
+        {player.name}
+      </td>
       <td className="player_id">
         {player.id}
       </td>
@@ -33,6 +36,7 @@ const PlayerList = ({ myId, players }) =>
     <thead>
       <tr>
         <th>color</th>
+        <th>name</th>
         <th>id</th>
         <th>status</th>
         <th>pos</th>
