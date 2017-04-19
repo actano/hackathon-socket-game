@@ -22,9 +22,14 @@ const keyCodes = {
 var canvas = document.getElementById('board');
 var playerIcon = document.getElementById('player');
 
+const nameInput = document.getElementById('name')
+
 const updatePlayerList = players => {
   players.forEach(player => state.playerById[player.id] = player)
   const myself = state.playerById[myId]
+  if (!nameInput.value) {
+    nameInput.value = myself.name
+  }
   state.players = players
   renderPlayerList(myId, players)
 }
@@ -38,6 +43,14 @@ $(document).keydown((event) => {
 
 $('#start-game').click(function() {
   socket.emit('start game', {})
+})
+
+$('#name').keyup(function(event) {
+  const newName = event.target.value
+  const oldName = state.playerById[myId].name
+  if (newName !== oldName) {
+    socket.emit('change name', {playerId: myId, name: newName})
+  }
 })
 
 socket.on('game over', (event) => {
@@ -56,6 +69,10 @@ socket.on('game over', (event) => {
 socket.on('assign player id', ({ id }) => {
   myId = id
   console.log(`assign player id ${myId}`)
+  const existingName = nameInput.value
+  if (existingName) {
+    socket.emit('change name', {playerId: myId, name: nameInput.value})
+  }
 })
 
 socket.on('player joined', function(event){
@@ -67,6 +84,13 @@ socket.on('player joined', function(event){
 socket.on('player left', function(event){
   const { id, players, world } = event
   console.log(`player ${id} disconnected`)
+  updatePlayerList(players)
+  drawFrame(world, players)
+});
+
+socket.on('player changed', function(event){
+  const { id, players, world } = event
+  console.log(`player ${id} changed`)
   updatePlayerList(players)
   drawFrame(world, players)
 });

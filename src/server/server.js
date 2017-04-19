@@ -253,6 +253,13 @@ io.on('connection', function(socket){
     io.emit('game started', {})
     if (!state.running) startGameLoop()
   })
+
+  socket.on('change name', (event) => {
+    const { playerId, name } = event
+    const player = state.players.find(p => p.id === playerId)
+    player.name = name
+    connectionEvent('player changed', playerId)
+  })
 })
 
 http.listen(port, function(){

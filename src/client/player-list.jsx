@@ -20,7 +20,7 @@ const Player = ({ mySelf, player }) =>
         {player.id}
       </td>
       <td className="player_type">
-        {player.playing ? 'player' : 'visitor'}
+        {player.playing ? 'alive' : 'dead'}
       </td>
       <td className="player_pos">
         { `(${player.position})`}

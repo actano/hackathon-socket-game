@@ -4,7 +4,27 @@
     <title>Socket.IO chat</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; background-color: #DDDDDD;}
+      body {
+        font: 13px Helvetica, Arial;
+        background-color: #DDDDDD;
+        text-align: center;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 10px 10px 5px
+      }
+      h2 {
+        margin: 10px 10px 5px
+      }
+      #players {
+        display: table;
+        margin: auto;
+      }
+      #name {
+        font-size: 24px;
+        text-align: center;
+        width: 150px;
+      }
       #player {
         display: inline-block;
         margin: 20px;
@@ -50,7 +70,11 @@
      </style>
   </head>
   <body>
+    <h1>Welcome <input type="text" id="name"/> !</h1>
+
+    <h2>players</h2>
     <div id="players"></div>
+
     <button id="start-game">Start the game</button><br>
     <div id="player">
       <canvas id="board"></canvas>
