@@ -155,9 +155,19 @@ socket.on('player changed', function(event){
   drawFrame(world, players)
 });
 
+socket.on('on count down', function(event){
+  const { countDown } = event
+  state.phase = 'countDown'
+  $('#count-down').show()
+  $('#count-down').text(countDown)
+  updateButton()
+  console.log(`count down ${countDown}`)
+});
+
 socket.on('game started', function(event){
   state.phase = 'running'
   winnerId = null
+  $('#count-down').hide()
   updateButton()
   console.log(`game started`)
 });

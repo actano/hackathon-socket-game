@@ -30,10 +30,19 @@
         margin: 20px;
         border: solid 1px #000;
         padding: 10px;
+        position: relative;
       }
       #board {
         border: solid 1px #000;
         image-rendering: pixelated;
+      }
+      #count-down {
+        display:none;
+        position: absolute;
+        font-size: 200px;
+        top: 0px;
+        left: 0px;
+        border: solid 1px #000;
       }
       .player-list {
         border-collapse:collapse;
@@ -81,6 +90,7 @@
     <button id="change-color">change color</button><br>
     <div id="player">
       <canvas id="board"></canvas>
+      <div id="count-down"></div>
     </div>
     <ul id="messages"></ul>
     <script src="/bundle.js"></script>

@@ -32,6 +32,7 @@ let state = {
   lastPlayerId: 1,
   phase: 'lobby',
   frameIdx: 0,
+  countDown: 0,
 }
 
 
@@ -71,9 +72,26 @@ function initializeWorld(size) {
   return world
 }
 
+function startCountDown(start) {
+  state.phase = 'countdown'
+  if (start) {
+    state.countDown = start
+  } else {
+    state.countDown--
+  }
+
+  if (state.countDown >= 0) {
+    io.emit('on count down', { countDown: state.countDown })
+    timer = setTimeout(startCountDown, 1000)
+  } else {
+    startGameLoop()
+  }
+}
+
 function startGameLoop() {
   state.phase = 'running'
   state.frameIdx = 0
+  io.emit('game started', {})
   timer = setInterval(gameLoop, frameRate)
 }
 
@@ -245,8 +263,7 @@ io.on('connection', function(socket){
 
   socket.on('start game', () => {
     if (state.phase !== 'lobby') return
-    io.emit('game started', {})
-    startGameLoop()
+    startCountDown(3)
   })
 
   socket.on('start lobby', () => {
